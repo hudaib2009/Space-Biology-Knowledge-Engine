@@ -14,74 +14,7 @@
   <!-- Fuse.js for fuzzy search -->
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
 
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f9f9f9;
-      margin: 0;
-      padding: 20px;
-    }
 
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .brand {
-      text-align: center;
-      margin-bottom: 30px;
-      width: 600px;
-    }
-
-    .brand img {
-      width: 100px;
-      height: auto;
-    }
-
-    #Title {
-      margin: 10px 0 20px;
-    }
-
-    .search-area {
-      width: 100%;
-      max-width: 600px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    #searchInput {
-      width: 100%;
-      padding: 12px;
-      font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-
-    .result {
-      width: 100%;
-      margin-top: 20px;
-    }
-
-    .result a {
-      display: block;
-      padding: 10px;
-      margin: 6px 0;
-      background-color: #fff;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      text-decoration: none;
-      color: #333;
-      transition: background-color 0.2s ease;
-    }
-
-    .result a:hover {
-      background-color: #f0f0f0;
-    }
-  </style>
 </head>
 <body>
   <div class="container">
@@ -159,11 +92,26 @@
         const link = item.Link || '#';
         const title = item.Title || 'Untitled';
 
-        const linkElement = document.createElement('a');
-        linkElement.href = link;
-        linkElement.textContent = title;
-        linkElement.target = '_blank';
-        resultsDiv.appendChild(linkElement);
+        const card = document.createElement('a');
+        card.href = link;
+        card.target = '_blank';
+        card.className = 'result-card';
+
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'title';
+        titleDiv.textContent = title;
+
+        const linkDiv = document.createElement('div');
+        linkDiv.className = 'link';
+        linkDiv.textContent = link;
+
+        meta.appendChild(titleDiv);
+        meta.appendChild(linkDiv);
+        card.appendChild(meta);
+        resultsDiv.appendChild(card);
       });
     });
   </script>
