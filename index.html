@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title Link Search</title>
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2em; }
+    input[type="text"] { width: 100%; padding: 0.5em; font-size: 1em; }
+    .result { margin-top: 1em; }
+    .result a { display: block; margin: 0.5em 0; color: blue; text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <h2>Search Titles from CSV</h2>
+  <input type="text" id="searchInput" placeholder="Start typing to search..." disabled />
+
+  <div class="result" id="results"></div>
+
+  <script>
+    let fuse;
+    let data = [];
+
+    // Updated CSV parser to handle quoted values and commas inside quotes
+    function parseCSV(text) {
+      const lines = text.trim().split('\n');
+      const headers = lines[0].split(',');
+      
+      // Use a regex to handle quoted fields properly
+      const csvRegex = /(".*?"|[^",\n]+)(?=\s*,|\s*$)/g;
+
+      return lines.slice(1).map(line => {
+        const values = [];
+        let match;
+
+        // Use the regex to extract values, properly handling quotes and commas
+        while (match = csvRegex.exec(line)) {
+          values.push(match[0].replace(/(^"|"$)/g, '')); // Remove surrounding quotes
+        }
+
+        const obj = {};
+        headers.forEach((header, i) => {
+          obj[header.trim()] = values[i].trim();
+        });
+
+        // Fix the 'Link' column if it starts with 'file://'
+        if (obj.Link && obj.Link.startsWith('file://')) {
+          // Replace with a valid URL or handle as needed
+          obj.Link = 'https://example.com/placeholder';
+        }
+
+        return obj;
+      });
+    }
+
+    // Fetch CSV file from the current directory (./data.csv)
+    fetch('./data.csv')
+      .then(response => response.text())
+      .then(csvText => {
+        data = parseCSV(csvText);
+
+        // Initialize Fuse.js
+        fuse = new Fuse(data, {
+          keys: ['Title'],
+          threshold: 0.4,
+        });
+
+        document.getElementById('searchInput').disabled = false;
+      })
+      .catch(err => {
+        console.error('Error loading the CSV file:', err);
+      });
+
+    // Handle search input
+    document.getElementById('searchInput').addEventListener('input', function (e) {
+      const query = e.target.value;
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '';
+
+      if (!query || !fuse) return;
+
+      const results = fuse.search(query);
+
+      if (results.length === 0) {
+        resultsDiv.innerHTML = '<p>No matches found.</p>';
+        return;
+      }
+
+      results.forEach(result => {
+        const item = result.item;
+        const linkElement = document.createElement('a');
+        linkElement.href = item.Link;
+        linkElement.textContent = item.Title;
+        linkElement.target = '_blank';
+        resultsDiv.appendChild(linkElement);
+      });
+    });
+  </script>
+
+</body>
+</html>
+
